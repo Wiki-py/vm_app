@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Incident</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    .form-section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .panic-btn {
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      color: white;
+      font-weight: bold;
+      border: none;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <!-- Header with back button -->
+  <header class="sticky-top bg-white shadow-sm">
+    <div class="container-fluid py-2">
+      <div class="d-flex align-items-center">
+        <a href="{% url 'agent_dashboard' %}" class="btn btn-sm btn-outline-secondary me-2">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+        <h5 class="mb-0">Report Incident</h5>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-fluid p-3">
+    <!-- Emergency action -->
+    <div class="d-grid mb-4">
+      <button class="btn btn-lg panic-btn py-3">
+        <i class="bi bi-exclamation-triangle-fill"></i> EMERGENCY PANIC BUTTON
+      </button>
+    </div>
+
+    <!-- Incident form -->
+    <div class="form-section">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label class="form-label fw-bold">Incident Type *</label>
+          <select class="form-select form-select-lg" name="incident_type" required>
+            <option value="" selected disabled>Select incident type</option>
+            <option value="late_open">Late Opening of Polls</option>
+            <option value="missing_materials">Missing Voting Materials</option>
+            <option value="voter_intimidation">Voter Intimidation</option>
+            <option value="ballot_stuffing">Ballot Stuffing</option>
+            <option value="technical_issue">Technical Issue</option>
+            <option value="other">Other Incident</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Polling Station Name *</label>
+          <input type="text" class="form-control form-control-lg" name="poll_name" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Location Details *</label>
+          <textarea class="form-control" name="location" rows="2" required></textarea>
+          <div class="form-text">Be specific about the location</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Description *</label>
+          <textarea class="form-control" name="comment" rows="4" required></textarea>
+          <div class="form-text">Describe what happened in detail</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Photo Evidence *</label>
+          <input type="file" class="form-control" name="photo" accept="image/*" required>
+          <div class="form-text">Take a photo directly or upload from gallery</div>
+        </div>
+
+        <div class="form-check form-switch mb-4">
+          <input class="form-check-input" type="checkbox" id="urgentSwitch" name="isUrgent">
+          <label class="form-check-label fw-bold" for="urgentSwitch">Mark as Urgent Incident</label>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary btn-lg py-3">
+            <i class="bi bi-send-fill"></i> SUBMIT INCIDENT REPORT
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Quick tips -->
+    <div class="alert alert-info">
+      <h6><i class="bi bi-info-circle-fill"></i> Safety Tips:</h6>
+      <ul class="mb-0">
+        <li>Don't put yourself in danger to document incidents</li>
+        <li>Use the panic button for immediate threats</li>
+        <li>Be factual in your descriptions</li>
+      </ul>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Make panic button more prominent
+    document.querySelector('.panic-btn').addEventListener('click', function() {
+        if(confirm('This will immediately alert authorities. Only use for emergencies. Continue?')) {
+            // Send WhatsApp message to candidate
+            sendWhatsAppAlert();
+            alert('Emergency alert sent! Authorities have been notified.');
+        }
+    });
+
+    function sendWhatsAppAlert() {
+    const emergencyNumber = '911234567890';
+    const emergencyMessage = encodeURIComponent(
+        `EMERGENCY ALERT! Candidate requires immediate assistance.\n\n` +
+        `Location: ${window.location.href}\n` +
+        `Time: ${new Date().toLocaleString()}`
+    );
+
+    // Create visible iframe with styling
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://web.whatsapp.com/send?phone=${emergencyNumber}&text=${emergencyMessage}`;
+    
+    // Style the iframe
+    iframe.style.position = 'fixed';
+    iframe.style.top = '50%';
+    iframe.style.left = '50%';
+    iframe.style.transform = 'translate(-50%, -50%)';
+    iframe.style.width = '80vw';
+    iframe.style.height = '80vh';
+    iframe.style.border = '2px solid #25D366'; // WhatsApp green
+    iframe.style.borderRadius = '10px';
+    iframe.style.boxShadow = '0 0 20px rgba(0,0,0,0.3)';
+    iframe.style.zIndex = '1000';
+    iframe.style.backgroundColor = 'white';
+    
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '999';
+    
+    // Add close button
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.right = '-15px';
+    closeBtn.style.top = '-15px';
+    closeBtn.style.width = '40px';
+    closeBtn.style.height = '40px';
+    closeBtn.style.borderRadius = '50%';
+    closeBtn.style.backgroundColor = '#25D366';
+    closeBtn.style.color = 'white';
+    closeBtn.style.border = 'none';
+    closeBtn.style.fontSize = '24px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    closeBtn.onclick = function() {
+        document.body.removeChild(overlay);
+        document.body.removeChild(iframe);
+    };
+    
+    // Append elements
+    iframe.appendChild(closeBtn);
+    //document.body.appendChild(overlay);
+    document.body.appendChild(iframe);
+    
+    // Auto-remove after 30 seconds if not closed manually
+    setTimeout(() => {
+        if (document.body.contains(iframe)) {
+            document.body.removeChild(overlay);
+            document.body.removeChild(iframe);
+        }
+    }, 40000);
+}
+</script>
+</body>
+</html>

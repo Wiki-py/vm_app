@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Critical for mobile responsiveness -->
+  <title>Panic Alert</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-sm-12">  <!-- Adjusts width for mobile & desktop -->
+        <div class="card shadow">
+          <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">🚨 Emergency Alert</h5>
+          </div>
+          <div class="card-body">
+            <form method="post" action="{% url 'panic_alert_submit' %}">
+              {% csrf_token %}
+              
+              <!-- Optional Location Field (Collapsible for Mobile) -->
+              <div class="mb-3">
+                <button class="btn btn-sm btn-outline-secondary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#locationField">
+                  + Add Location (Optional)
+                </button>
+                <div class="collapse" id="locationField">
+                  <input 
+                    type="text" 
+                    name="location" 
+                    class="form-control" 
+                    placeholder="Where are you?"
+                  >
+                </div>
+              </div>
+
+              <!-- Submit Button (Full-width on Mobile) -->
+              <button type="submit" class="btn btn-danger w-100 py-2">
+                🚨 Trigger Panic Alert
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS (for collapsible feature) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

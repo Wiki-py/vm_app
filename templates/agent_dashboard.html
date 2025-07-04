@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    .quick-action-btn {
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .quick-action-btn:hover {
+      transform: translateY(-2px);
+    }
+    .status-card {
+      border-left: 4px solid #0d6efd;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <!-- App header -->
+  <header class="sticky-top bg-white shadow-sm">
+    <div class="container-fluid py-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-0">Poll Agent</h5>
+          <small class="text-muted">Logged in as {{ user.username }}</small>
+        </div>
+        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-fluid p-3">
+    <!-- Status overview -->
+    <div class="row g-3 mb-4">
+      <div class="col-6">
+        <div class="status-card bg-white p-3 shadow-sm">
+          <small class="text-muted">Reports Submitted</small>
+          <h4 class="mb-0">{{ reports_counts }}</h4>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="status-card bg-white p-3 shadow-sm">
+          <small class="text-muted">Active Incidents</small>
+          <h4 class="mb-0">{{ incidents_counts }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <h5 class="mb-3">Quick Actions</h5>
+    <div class="row g-2 mb-4">
+      <div class="col-6">
+        <a href="{% url 'incident' %}" class="quick-action-btn bg-white shadow-sm d-block">
+          <div class="text-warning mb-1">
+            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+          </div>
+          <small>Report Incident</small>
+        </a>
+      </div>
+      <div class="col-6">
+        <button class="quick-action-btn bg-white shadow-sm w-100 border-0 panic-btn">
+          <div class="text-danger mb-1">
+            <i class="bi bi-alarm-fill fs-4"></i>
+          </div>
+          <small>Panic Button</small>
+        </button>
+      </div>
+      <div class="col-6">
+        <button class="quick-action-btn bg-white shadow-sm w-100 border-0">
+          <div class="text-primary mb-1">
+            <i class="bi bi-people-fill fs-4"></i>
+          </div>
+          <small>Voter Turnout</small>
+        </button>
+      </div>
+      <div class="col-6">
+        <button class="quick-action-btn bg-white shadow-sm w-100 border-0">
+          <div class="text-success mb-1">
+            <i class="bi bi-file-earmark-text-fill fs-4"></i>
+          </div>
+          <small>DR Forms</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- Report form -->
+    <div class="bg-white rounded-3 shadow-sm p-3 mb-4">
+      <h5 class="mb-3">Submit Vote Report</h5>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+          <label class="form-label">Polling Station</label>
+          <input type="text" class="form-control" name="poll_name" placeholder="Station name" required>
+        </div>
+        
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label">Valid Votes</label>
+            <input type="number" class="form-control" name="valid_vote" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Spoilt Votes</label>
+            <input type="number" class="form-control" name="spoilt_vote" required>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Candidate Votes</label>
+          <input type="number" class="form-control" name="vote_count" required>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">DR Form Photo</label>
+          <input type="file" class="form-control" name="dr_form" accept="image/*" required>
+        </div>
+        
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-cloud-upload"></i> Submit Report
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Recent activity -->
+    <h5 class="mb-3">Recent Activity</h5>
+    <div class="list-group">
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <span>Vote report submitted</span>
+          <small class="text-muted">10 min ago</small>
+        </div>
+      </div>
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <span>Incident reported</span>
+          <small class="text-muted">1 hour ago</small>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom navigation -->
+  <nav class="navbar fixed-bottom bg-white shadow-lg border-top">
+    <div class="container-fluid">
+      <div class="d-flex justify-content-around w-100">
+        <a href="#" class="btn btn-link text-primary">
+          <i class="bi bi-house-door-fill fs-5"></i>
+        </a>
+        <a href="{% url 'incident' %}" class="btn btn-link text-warning">
+          <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        </a>
+        <button class="btn btn-link text-danger panic-btn">
+          <i class="bi bi-alarm-fill fs-5"></i>
+        </button>
+        <a href="#" class="btn btn-link text-dark">
+          <i class="bi bi-person-fill fs-5"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Panic button functionality
+    document.querySelectorAll('.panic-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if(confirm('This will immediately alert emergency contacts. Only use in dangerous situations. Continue?')) {
+          // Implement panic functionality
+          alert('Emergency alert sent! Help is on the way.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+<script>
+// Auto-refresh counts every 30 seconds
+function refreshCounts() {
+    fetch(window.location.href)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Update reports count
+            const newReportsCount = doc.querySelector('.status-card:nth-child(1) h4').textContent;
+            document.querySelector('.status-card:nth-child(1) h4').textContent = newReportsCount;
+            
+            // Update incidents count
+            const newIncidentsCount = doc.querySelector('.status-card:nth-child(2) h4').textContent;
+            document.querySelector('.status-card:nth-child(2) h4').textContent = newIncidentsCount;
+        });
+}
+
+// Refresh every 30 seconds
+setInterval(refreshCounts, 30000);
+
+// Also refresh when returning to the page
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        refreshCounts();
+    }
+});
+</script>
+{% load static %}
+{% load i18n %}
