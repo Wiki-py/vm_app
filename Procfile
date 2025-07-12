@@ -1,1 +1,1 @@
-web: gunicorn pollagent.wsgi --timeout 120 --log-file -
+web: python manage.py migrate && gunicorn pollagent.wsgi --workers=1 --timeout=120 --access-logfile -
