@@ -1,0 +1,1 @@
+web: gunicorn pollagent.wsgi --log-file -
