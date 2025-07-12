@@ -19,6 +19,7 @@ class Agent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, default='Agent')
     agent_nin = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    passport = models.ImageField(upload_to='agents/', null=True, blank=True)
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='agents', null=True, blank=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -48,7 +49,7 @@ class VoteReport(models.Model):
     submitted_at = models.DateTimeField(default=timezone.now)
     
     def percentage_of_valid(self):
-        if self.valid_votes > 0:
+        if self.valid_vote > 0:
             return round((self.vote_count / self.valid_vote) * 100, 1)
         return 0
     
@@ -66,7 +67,8 @@ class Incident(models.Model):
     ]
     
     agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name='incidents', null=True, blank=True)
-    polling_station = models.ForeignKey(PollingStation, on_delete=models.CASCADE, default=None, null=True, blank=True)
+    location = models.CharField(max_length=200, blank=True)
+    location_description = models.CharField(max_length=200, blank=True)
     incident_type = models.CharField(max_length=50, choices=INCIDENT_TYPES)
     description = models.TextField(blank=True)
     photo = models.ImageField(upload_to='incidents/', null=True, blank=True)

@@ -184,6 +184,56 @@
       });
     });
   </script>
+  <style>
+  /* Add this to your existing styles */
+  body.bg-light {
+    padding-bottom: 60px; /* Match nav height */
+  }
+
+  .navbar.fixed-bottom {
+    height: 56px;
+    z-index: 1030;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .navbar.fixed-bottom.hidden {
+    transform: translateY(100%);
+  }
+
+  main.container-fluid {
+    margin-bottom: 60px;
+    padding-bottom: 20px;
+  }
+</style>
+
+<script>
+  // Add this script at the bottom before closing </body>
+  (function() {
+    const bottomNav = document.querySelector('.navbar.fixed-bottom');
+    let scrollTimeout;
+    let lastScrollPosition = 0;
+    let isScrollingDown = false;
+
+    window.addEventListener('scroll', function() {
+      const currentScrollPosition = window.pageYOffset;
+      isScrollingDown = currentScrollPosition > lastScrollPosition;
+      lastScrollPosition = currentScrollPosition;
+
+      // Clear any existing timeout
+      clearTimeout(scrollTimeout);
+
+      // Show nav if scrolling up or at top
+      if (!isScrollingDown || currentScrollPosition === 0) {
+        bottomNav.classList.remove('hidden');
+      } else {
+        // Hide nav after 1 second of scrolling down
+        scrollTimeout = setTimeout(() => {
+          bottomNav.classList.add('hidden');
+        }, 1000);
+      }
+    });
+  })();
+</script>
 </body>
 </html>
 

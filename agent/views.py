@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.db import models
-from django.db.models import Sum, ExpressionWrapper, F, FloatField
+from django.db.models import Sum, ExpressionWrapper, F, FloatField, Avg
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -86,7 +87,7 @@ def candidate_dashboard(request):
         'total_votes': vote_totals['valid_vote'] or 0,
         'candidate_votes': vote_totals['vote_count'] or 0,
         'spoilt_votes': vote_totals['spoilt_vote'] or 0,
-        'active_incidents_count': incidents.count(),
+        'active_incidents_count': incidents.count() or 0,
         # ... other context
     }
     
@@ -152,7 +153,12 @@ def reported_incidents(request):
     except:
         return redirect('candidate_login')
     
-    incidents = Incident.objects.filter(agent__candidate=candidate).order_by('-submitted_at')
+    # Get incidents with related data
+    incidents = Incident.objects.filter(agent__candidate=candidate)\
+                                .select_related('agent', 'agent__user', )\
+                                .order_by('-submitted_at')
+    
+    # Counts for summary
     urgent_count = incidents.filter(is_urgent=True, resolved=False).count()
     resolved_count = incidents.filter(resolved=True).count()
     
@@ -160,9 +166,9 @@ def reported_incidents(request):
         'incidents': incidents,
         'urgent_count': urgent_count,
         'resolved_count': resolved_count,
+        'now': timezone.now()  # For timestamp calculations
     }
     return render(request, 'reported_incidents.html', context)
-
 @login_required
 def results_summary(request):
     try:
@@ -173,26 +179,30 @@ def results_summary(request):
     # Get all reports for this candidate
     reports = VoteReport.objects.filter(agent__candidate=candidate)
     
-    # Calculate totals
+    # Calculate totals - EVALUATE THE SUMS IMMEDIATELY
     total_stations = PollingStation.objects.count()
     reported_stations = reports.values('poll_name').distinct().count()
-    total_votes = models.Sum(report.valid_vote for report in reports)
-    candidate_votes = models.Sum(report.vote_count for report in reports)
-    spoilt_votes = models.Sum(report.spoilt_vote for report in reports)
+    total_votes = sum(report.valid_vote for report in reports) or 0
+    candidate_votes = sum(report.vote_count for report in reports) or 0
+    spoilt_votes = sum(report.spoilt_vote for report in reports) or 0
+    
+    # Calculate percentages
+    turnout_percentage = (total_votes / (total_votes + spoilt_votes)) * 100 if (total_votes + spoilt_votes) > 0 else 0
+    vote_share = (candidate_votes / total_votes) * 100 if total_votes > 0 else 0
     
     # Get top performing areas
     top_areas = reports.values(
-    'poll_name', 
-    'location'
-).annotate(
-    votes=Sum('vote_count'),
-    valid_votes=Sum('valid_vote')
-).annotate(
-    percentage=ExpressionWrapper(
-        F('votes') * 100.0 / F('valid_votes'),
-        output_field=FloatField()
-    )
-).order_by('-votes')[:5]
+        'poll_name', 
+        'location'
+    ).annotate(
+        votes=Sum('vote_count'),
+        valid_votes=Sum('valid_vote')
+    ).annotate(
+        percentage=ExpressionWrapper(
+            F('votes') * 100.0 / F('valid_votes'),
+            output_field=FloatField()
+        )
+    ).order_by('-votes')[:5]
     
     # Get regional breakdown
     regions = Region.objects.annotate(
@@ -207,19 +217,10 @@ def results_summary(request):
     ).annotate(
         votes=models.Sum('vote_count'),
         percentage=ExpressionWrapper(
-        F('votes') * 100.0 / F('valid_vote'),
-        output_field=FloatField())
+            F('votes') * 100.0 / F('valid_vote'),
+            output_field=FloatField()
+        )
     ).order_by('-votes')[:10]
-    
-    # Get candidate comparison data
-    #candidates = Candidate.objects.annotate(
-        #votes=models.Sum('agents__votereport__candidate_votes'),
-        #percentage=models.Avg('agent__votereport__percentage_of_valid')
-    #).order_by('-votes')
-    
-    # Mark which candidate is the current user
-    #for c in candidates:
-        #c.is_you = (c == candidate)
     
     context = {
         'total_stations': total_stations,
@@ -227,9 +228,42 @@ def results_summary(request):
         'total_votes': total_votes,
         'candidate_votes': candidate_votes,
         'spoilt_votes': spoilt_votes,
+        'turnout_percentage': round(turnout_percentage, 1),
+        'vote_share': round(vote_share, 1),
         'top_areas': top_areas,
         'regions': regions,
         'polling_stations': polling_stations,
-        #'candidates': candidates,
     }
     return render(request, 'results.html', context)
+@login_required
+def reports(request):
+    try:
+        candidate = request.user.candidate
+    except:
+        return redirect('candidate_login')
+    reports = VoteReport.objects.filter(agent__candidate=candidate).order_by('-submitted_at')
+    
+    return render(request, 'reports.html', context = {
+        'reports':reports
+    })
+
+
+@login_required
+def report_detail(request, report_id):
+    try:
+        candidate = request.user.candidate
+        report = VoteReport.objects.get(
+            id=report_id,
+            agent__candidate=candidate
+        )
+    except VoteReport.DoesNotExist:
+        messages.error(request, "Report not found or you don't have permission to view it")
+        return redirect('reports')
+    except Candidate.DoesNotExist:
+        return redirect('candidate_login')
+    
+    context = {
+        'report': report,
+        'percentage': report.percentage_of_valid(),
+    }
+    return render(request, 'report_detail.html', context)

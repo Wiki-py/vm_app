@@ -17,7 +17,7 @@ class IncidentReportForm(forms.ModelForm):
     class Meta:
         model = Incident
         fields = [
-            'polling_station', 'incident_type', 'description', 
+            'location', 'incident_type', 'description', 'location_description',
             'photo', 'is_urgent'
         ]
         widgets = {

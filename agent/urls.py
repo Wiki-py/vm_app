@@ -12,6 +12,8 @@ urlpatterns = [
     path('candidate_dashboard.html', views.candidate_dashboard, name='candidate_dashboard'),
     path('reported_incidents.html', views.reported_incidents, name='reported_incident'),
     path('results.html', views.results_summary, name='results_summary'),
+    path('reports.html', views.reports, name='reports'),
+    path('report_detail/<int:report_id>/', views.report_detail, name='report_detail'),
     
     
     # Agent URLs

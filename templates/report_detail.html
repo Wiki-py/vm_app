@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    .detail-card {
+      border-radius: 10px;
+      border-left: 4px solid #0d6efd;
+    }
+    .photo-container {
+      max-height: 400px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+    .stat-card {
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+    body {
+      padding-bottom: 60px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <!-- Header -->
+  <header class="sticky-top bg-white shadow-sm">
+    <div class="container-fluid py-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <a href="{% url 'candidate_dashboard' %}" class="btn btn-sm btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i>
+          </a>
+          <h5 class="d-inline-block mb-0">Report Details</h5>
+        </div>
+        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-fluid p-3">
+    <!-- Report Summary -->
+    <div class="detail-card bg-white p-3 shadow-sm mb-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h4>{{ report.poll_name }}</h4>
+          <p class="text-muted mb-1">
+            <i class="bi bi-geo-alt-fill"></i> {{ report.location }}
+          </p>
+          <small class="text-muted">
+            <i class="bi bi-clock"></i> {{ report.submitted_at|date:"M j, Y H:i" }}
+            ({{ report.submitted_at|timesince }} ago)
+          </small>
+        </div>
+        <span class="badge bg-primary">
+          {{ percentage }}% of valid votes
+        </span>
+      </div>
+
+      <!-- Voting Stats -->
+      <div class="row g-3 mb-3">
+        <div class="col-4">
+          <div class="stat-card bg-white p-2 shadow-sm text-center">
+            <small class="text-muted">Valid Votes</small>
+            <h4 class="mb-0 text-primary">{{ report.valid_vote }}</h4>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-card bg-white p-2 shadow-sm text-center">
+            <small class="text-muted">Your Votes</small>
+            <h4 class="mb-0 text-success">{{ report.vote_count }}</h4>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-card bg-white p-2 shadow-sm text-center">
+            <small class="text-muted">Spoilt Votes</small>
+            <h4 class="mb-0 text-danger">{{ report.spoilt_vote }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Comment -->
+      {% if report.comment %}
+      <div class="mb-3">
+        <h6>Agent's Comments:</h6>
+        <div class="bg-light p-3 rounded">
+          {{ report.comment }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Photo Evidence -->
+    {% if report.photo %}
+    <div class="mb-4">
+      <h5 class="mb-2">Photo Evidence</h5>
+      <div class="photo-container">
+        <img src="{{ report.photo.url }}" class="img-fluid w-100" alt="Report photo">
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- DR Form -->
+    {% if report.dr_form %}
+    <div class="mb-4">
+      <h5 class="mb-2">DR Form</h5>
+      <a href="{{ report.dr_form.url }}" class="btn btn-outline-primary w-100" target="_blank">
+        <i class="bi bi-file-earmark-pdf"></i> View DR Form
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Agent Info -->
+    <div class="bg-white p-3 rounded-3 shadow-sm">
+  <h5 class="mb-3">Reporting Agent</h5>
+  <div class="d-flex align-items-start">
+    <!-- Agent Photo -->
+    {% if report.agent.passport %}
+    <div class="me-3">
+      <div class="rounded-circle overflow-hidden" style="width: 80px; height: 80px;">
+        <img src="{{ report.agent.passport.url }}" 
+             class="img-fluid h-100 w-100 object-fit-cover" 
+             alt="Agent passport photo">
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Agent Details -->
+    <div class="flex-grow-1">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="mb-1">{{ report.agent.user.get_full_name|default:report.agent.user.username }}</h6>
+          <h6 class="mb-1">{{ report.agent.name }}</h6>
+          <small class="text-muted">
+            <i class="bi bi-envelope"></i> {{ report.agent.user.email }}
+          </small>
+          {% if report.agent.phone %}
+          <br>
+          <small class="text-muted">
+            <i class="bi bi-telephone"></i> {{ report.agent.phone }}
+          </small>
+          {% endif %}
+        </div>
+        <span class="badge bg-secondary">
+          Agent ID: {{ report.agent.id }}
+        </span>
+      </div>
+      
+      <!-- Additional Agent Info -->
+      <div class="mt-2">
+        {% if report.agent.agent_nin %}
+        <small class="text-muted">
+          <i class="bi bi-person-badge"></i> NIN: {{ report.agent.agent_nin }}
+        </small>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="navbar fixed-bottom bg-white shadow-lg border-top">
+    <div class="container-fluid">
+      <div class="d-flex justify-content-around w-100">
+        <a href="{% url 'candidate_dashboard' %}" class="btn btn-link text-dark">
+          <i class="bi bi-house-door fs-5"></i>
+        </a>
+        <a href="{% url 'reported_incident' %}" class="btn btn-link text-warning">
+          <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        </a>
+        <a href="{% url 'results_summary' %}" class="btn btn-link text-success">
+          <i class="bi bi-bar-chart-fill fs-5"></i>
+        </a>
+        <a href="#" class="btn btn-link text-dark">
+          <i class="bi bi-person-fill fs-5"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+  <style>
+  /* Add this to your existing styles */
+  body.bg-light {
+    padding-bottom: 60px; /* Match nav height */
+  }
+
+  .navbar.fixed-bottom {
+    height: 56px;
+    z-index: 1030;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .navbar.fixed-bottom.hidden {
+    transform: translateY(100%);
+  }
+
+  main.container-fluid {
+    margin-bottom: 60px;
+    padding-bottom: 20px;
+  }
+</style>
+
+<script>
+  // Add this script at the bottom before closing </body>
+  (function() {
+    const bottomNav = document.querySelector('.navbar.fixed-bottom');
+    let scrollTimeout;
+    let lastScrollPosition = 0;
+    let isScrollingDown = false;
+
+    window.addEventListener('scroll', function() {
+      const currentScrollPosition = window.pageYOffset;
+      isScrollingDown = currentScrollPosition > lastScrollPosition;
+      lastScrollPosition = currentScrollPosition;
+
+      // Clear any existing timeout
+      clearTimeout(scrollTimeout);
+
+      // Show nav if scrolling up or at top
+      if (!isScrollingDown || currentScrollPosition === 0) {
+        bottomNav.classList.remove('hidden');
+      } else {
+        // Hide nav after 1 second of scrolling down
+        scrollTimeout = setTimeout(() => {
+          bottomNav.classList.add('hidden');
+        }, 1000);
+      }
+    });
+  })();
+</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
