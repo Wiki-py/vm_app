@@ -1,0 +1,13 @@
+{
+  "root": "staticfiles/",
+  "routes": {
+    "/**": "index.html",
+    "/media/**": {
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Security-Policy": "default-src 'self'",
+        "X-Content-Type-Options": "nosniff"
+      }
+    }
+  }
+}
