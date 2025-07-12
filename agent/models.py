@@ -45,7 +45,12 @@ class VoteReport(models.Model):
     vote_count = models.IntegerField(default=0)
     comment = models.TextField(blank=True)
     photo = models.ImageField(upload_to='vote_reports/', null=True, blank=True)
-    dr_form = models.FileField(upload_to='dr_forms/')
+    #dr_form = models.FileField(upload_to='dr_forms/')
+    dr_form = models.FileField(
+        upload_to='dr_forms/', 
+        blank=True, 
+        null=True,
+        verbose_name="DR Form Photo")
     submitted_at = models.DateTimeField(default=timezone.now)
     
     def percentage_of_valid(self):

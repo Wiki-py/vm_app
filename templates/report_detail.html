@@ -109,14 +109,20 @@
     {% endif %}
 
     <!-- DR Form -->
-    {% if report.dr_form %}
-    <div class="mb-4">
-      <h5 class="mb-2">DR Form</h5>
-      <a href="{{ report.dr_form.url }}" class="btn btn-outline-primary w-100" target="_blank">
-        <i class="bi bi-file-earmark-pdf"></i> View DR Form
-      </a>
-    </div>
-    {% endif %}
+   <!-- DR Form -->
+{% if report.dr_form %}
+<div class="mb-4">
+  <h5 class="mb-2">DR Form</h5>
+  <div class="d-flex gap-2">
+    <a href="{{ report.dr_form.url }}" class="btn btn-outline-primary flex-grow-1" target="_blank">
+      <i class="bi bi-eye"></i> View
+    </a>
+    <a href="{% url 'download_dr_form' report.id %}" class="btn btn-primary">
+      <i class="bi bi-download"></i> Download
+    </a>
+  </div>
+</div>
+{% endif %}
 
     <!-- Agent Info -->
     <div class="bg-white p-3 rounded-3 shadow-sm">

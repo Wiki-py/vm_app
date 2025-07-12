@@ -1,3 +1,6 @@
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.db import models
@@ -267,3 +270,27 @@ def report_detail(request, report_id):
         'percentage': report.percentage_of_valid(),
     }
     return render(request, 'report_detail.html', context)
+
+@login_required
+def download_dr_form(request, report_id):
+    try:
+        candidate = request.user.candidate
+        report = get_object_or_404(
+            VoteReport,
+            id=report_id,
+            agent__candidate=candidate
+        )
+        
+        if not report.dr_form:
+            messages.error(request, "No DR form available for download")
+            return redirect('report_detail', report_id=report_id)
+            
+        response = FileResponse(report.dr_form.open(), as_attachment=True)
+        response['Content-Disposition'] = f'attachment; filename="{report.dr_form.name.split("/")[-1]}"'
+        return response
+        
+    except VoteReport.DoesNotExist:
+        messages.error(request, "Report not found or you don't have permission")
+        return redirect('reports')
+    except Candidate.DoesNotExist:
+        return redirect('candidate_login')
