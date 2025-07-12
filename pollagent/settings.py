@@ -26,7 +26,17 @@ SECRET_KEY = 'django-insecure-1p54fv)xqamxd8m(k(=zz3u@6nk)d)1)0+kt8m%$9xd2^_er)_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://vmapp-production.up.railway.app',
+    'https://*.up.railway.app'
+]
+
+# Also ensure these are set correctly
+ALLOWED_HOSTS = [
+    'vmapp-production.up.railway.app',
+    'localhost',
+    '127.0.0.1'
+]
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
