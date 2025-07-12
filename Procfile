@@ -1,1 +1,1 @@
-web: gunicorn pollagent.wsgi --log-file -
+web: gunicorn your_project.wsgi --workers=1 --timeout=120 --log-file -
