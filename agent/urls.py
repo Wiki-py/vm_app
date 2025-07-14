@@ -15,6 +15,7 @@ urlpatterns = [
     path('reports.html', views.reports, name='reports'),
     path('report_detail/<int:report_id>/', views.report_detail, name='report_detail'),
     path('reports/<int:report_id>/download-dr-form/', views.download_dr_form, name='download_dr_form'),
+    path('reports/<int:report_id>/download-incident-form/', views.reportsview, name='download_incident_form'),
     
     
     # Agent URLs

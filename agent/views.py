@@ -294,3 +294,24 @@ def download_dr_form(request, report_id):
         return redirect('reports')
     except Candidate.DoesNotExist:
         return redirect('candidate_login')
+
+from  django.core.paginator import Paginator
+@login_required
+def reportsview(request):
+    try:
+        candidate = request.user.candidate
+    except:
+        return redirect('candidate_login')
+    
+    # Get reports with pagination
+    reports_list = VoteReport.objects.filter(agent__candidate=candidate).order_by('-submitted_at')
+    
+    # Paginate with 10 reports per page
+    paginator = Paginator(reports_list, 10)  # Show 10 reports per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'reports.html', {
+        'page_obj': page_obj,
+        'total_reports': reports_list.count()
+    })

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Reports</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    .report-card {
+      transition: all 0.2s;
+      border-left: 4px solid #0d6efd;
+      border-radius: 8px;
+    }
+    .report-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 3px 6px;
+    }
+    .pagination .page-item.active .page-link {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+    body {
+      padding-bottom: 60px;
+    }
+    .summary-card {
+      border-radius: 10px;
+    }
+    @media (max-width: 576px) {
+      .report-card {
+        margin-bottom: 15px;
+      }
+      .stats-col {
+        margin-bottom: 15px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <!-- App header -->
+  <header class="sticky-top bg-white shadow-sm">
+    <div class="container-fluid py-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <a href="{% url 'candidate_dashboard' %}" class="btn btn-sm btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i>
+          </a>
+          <h5 class="d-inline-block mb-0">All Reports</h5>
+        </div>
+        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-fluid p-3">
+    <!-- Summary stats -->
+    
+
+    <!-- Reports list -->
+    
+    {% if reports %}
+      <div class="row g-3">
+        {% for report in reports|slice:":600" %}
+        <div class="col-12">
+          <div class="report-card bg-white rounded-3 shadow-sm p-3">
+            <div class="d-flex justify-content-between mb-2">
+              <h6 class="mb-0">{{ report.poll_name }}</h6>
+              <small class="text-muted">{{ report.submitted_at|timesince }} ago</small>
+            </div>
+            <p class="text-muted small mb-2">{{ report.location }}</p>
+            
+            <div class="row g-2 text-center">
+              <div class="col-4">
+                <small>Valid Votes</small>
+                <p class="mb-0 fw-bold">{{ report.valid_vote }}</p>
+              </div>
+              <div class="col-4">
+                <small>Your Votes</small>
+                <p class="mb-0 fw-bold text-success">{{ report.vote_count }}</p>
+              </div>
+              <div class="col-4">
+                <small>Spoilt Votes</small>
+                <p class="mb-0 fw-bold text-danger">{{ report.spoilt_vote }}</p>
+              </div>
+            </div>
+            
+            
+            <div class="d-flex justify-content-end mt-2">
+              <!-- In your reports.html, modify the Details button -->
+<a href="{% url 'report_detail' report.id %}" class="btn btn-sm btn-outline-secondary">Details</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No reports submitted yet by your agents.
+      </div>
+    {% endif %}
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="navbar fixed-bottom bg-white shadow-lg border-top">
+    <div class="container-fluid">
+      <div class="d-flex justify-content-around w-100">
+        <a href="{% url 'candidate_dashboard' %}" class="btn btn-link text-dark">
+          <i class="bi bi-house-door fs-5"></i>
+        </a>
+        <a href="{% url 'reported_incident' %}" class="btn btn-link text-warning">
+          <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        </a>
+        <a href="{% url 'results_summary' %}" class="btn btn-link text-success">
+          <i class="bi bi-bar-chart-fill fs-5"></i>
+        </a>
+        <a href="#" class="btn btn-link text-dark">
+          <i class="bi bi-person-fill fs-5"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
