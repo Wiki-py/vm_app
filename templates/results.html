@@ -71,21 +71,21 @@
         <div class="summary-card bg-white p-3 shadow-sm text-center">
           <small class="text-muted">Total Votes</small>
           <h3 class="mb-0 text-dark">{{total_votes}}</h3>
-          <small class="text-muted">54.2% turnout</small>
+          <small class="text-muted">turnout</small>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="summary-card bg-white p-3 shadow-sm text-center">
           <small class="text-muted">Your Votes</small>
           <h3 class="mb-0 text-success">{{ candidate_votes }}</h3>
-          <small class="text-success">50.0% share</small>
+          <small class="text-success">share</small>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="summary-card bg-white p-3 shadow-sm text-center">
           <small class="text-muted">Spoilt Votes</small>
           <h3 class="mb-0 text-danger">{{spoilt_votes}}</h3>
-          <small class="text-muted">1.0% of total</small>
+          <small class="text-muted">from all polling stations</small>
         </div>
       </div>
     </div>
@@ -126,7 +126,7 @@
             <div class="mt-3">
               <div class="d-flex justify-content-between mb-1">
                 <small>Your Candidate</small>
-                <small>92,415 votes (50.0%)</small>
+                <small>{{ candidate_votes }}(50.0%)</small>
               </div>
               <div class="progress progress-thin">
                 <div class="progress-bar bg-success" role="progressbar" style="width: 50%"></div>
