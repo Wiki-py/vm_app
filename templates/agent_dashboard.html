@@ -95,60 +95,46 @@
 
     <!-- Report form -->
     <div class="bg-white rounded-3 shadow-sm p-3 mb-4">
-      <h5 class="mb-3">Submit Vote Report</h5>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        <div class="mb-3">
-          <label class="form-label">Polling Station</label>
-          <input type="text" class="form-control" name="poll_name" placeholder="Station name" required>
-        </div>
-        
-        <div class="row g-2 mb-3">
-          <div class="col-6">
-            <label class="form-label">Valid Votes</label>
-            <input type="number" class="form-control" name="valid_vote" required>
-          </div>
-          <div class="col-6">
-            <label class="form-label">Spoilt Votes</label>
-            <input type="number" class="form-control" name="spoilt_vote" required>
-          </div>
-        </div>
-        
-        <div class="mb-3">
-          <label class="form-label">Candidate Votes</label>
-          <input type="number" class="form-control" name="vote_count" required>
-        </div>
-        
-        <div class="mb-3">
-          <label class="form-label">DR Form Photo</label>
-          <input type="file" class="form-control" name="dr_form" accept="image/*" required>
-        </div>
-        
-        <div class="d-grid">
-          <button type="submit" class="btn btn-primary">
-            <i class="bi bi-cloud-upload"></i> Submit Report
-          </button>
-        </div>
-      </form>
+  <h5 class="mb-3">Submit Vote Report</h5>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Existing form fields -->
+    <div class="mb-3">
+      <label class="form-label">Polling Station</label>
+      <input type="text" class="form-control" name="poll_name" placeholder="Station name" required>
     </div>
     
-    <!-- Recent activity -->
-    <h5 class="mb-3">Recent Activity</h5>
-    <div class="list-group">
-      <div class="list-group-item">
-        <div class="d-flex justify-content-between">
-          <span>Vote report submitted</span>
-          <small class="text-muted">10 min ago</small>
-        </div>
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <label class="form-label">Valid Votes</label>
+        <input type="number" class="form-control" name="valid_vote" required>
       </div>
-      <div class="list-group-item">
-        <div class="d-flex justify-content-between">
-          <span>Incident reported</span>
-          <small class="text-muted">1 hour ago</small>
-        </div>
+      <div class="col-6">
+        <label class="form-label">Spoilt Votes</label>
+        <input type="number" class="form-control" name="spoilt_vote" required>
       </div>
     </div>
+    
+    <div class="mb-3">
+      <label class="form-label">Candidate Votes</label>
+      <input type="number" class="form-control" name="vote_count" required>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label">DR Form Photo</label>
+      <input type="file" class="form-control" name="dr_form" accept="image/*" required>
+    </div>
+    
+    <div class="d-grid">
+      <button type="submit" class="btn btn-primary" id="submit-report-btn">
+        <i class="bi bi-cloud-upload"></i> Submit Report
+      </button>
+    </div>
+  </form>
+</div>
+    <!-- Recent activity -->
+   
   </main>
 
   <!-- Bottom navigation -->
@@ -267,5 +253,86 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 </script>
+<!-- Add this script at the bottom of the file -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalBtnText = submitBtn.innerHTML;
+  
+  form.addEventListener('submit', function(e) {
+    // Disable the submit button
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
+    
+    // Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+    loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    loadingIndicator.style.zIndex = '1060';
+    loadingIndicator.innerHTML = `
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    `;
+    document.body.appendChild(loadingIndicator);
+    
+    // Create FormData object for AJAX submission
+    const formData = new FormData(form);
+    
+    // Submit form via AJAX
+    fetch("", {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        // Show success popup
+        const successPopup = document.createElement('div');
+        successPopup.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+        successPopup.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        successPopup.style.zIndex = '1060';
+        successPopup.innerHTML = `
+          <div class="bg-white rounded-3 shadow p-4 text-center" style="max-width: 90%; width: 400px;">
+            <i class="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
+            <h4>Report Submitted Successfully!</h4>
+            <p>Your vote report has been successfully submitted.</p>
+            <button class="btn btn-primary w-100" id="success-ok">OK</button>
+          </div>
+        `;
+        document.body.appendChild(successPopup);
+        
+        // Reset form after success
+        form.reset();
+        
+        // Add event listener for OK button
+        document.getElementById('success-ok').addEventListener('click', function() {
+          successPopup.remove();
+          location.reload(); // Refresh page to update counts
+        });
+      } else {
+        throw new Error('Form submission failed');
+      }
+    })
+    .catch(error => {
+      // Show error message
+      alert('Error submitting form: ' + error.message);
+    })
+    .finally(() => {
+      // Re-enable button and restore text
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+      loadingIndicator.remove();
+    });
+    
+    // Prevent default form submission
+    e.preventDefault();
+  });
+});
+</script>
+
 {% load static %}
 {% load i18n %}
